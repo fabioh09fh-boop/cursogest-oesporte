@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="pt-BR" :class="{ 'dark': darkMode }" x-data="dashboardData()">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSGE - Painel de Gestão (5ª Edição)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        sescRed: '#E30613',
+                        turquoise: '#06B6D4',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Alpine.js para interatividade -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-sky-50/50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200 text-base">
+
+    <!-- Top Navbar / Header -->
+    <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="bg-sescRed text-white font-bold px-3.5 py-2 rounded-lg text-lg tracking-wider shadow-sm">
+                    CSGE
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">5ª Edição | Curso Sesc de Gestão do Esporte</h1>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Diversidade, Cultura e Lazer • Início: 14/08/2026 a Término: 17/04/2027</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <!-- Botão Tema Claro/Escuro -->
+                <button @click="toggleTheme()" class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Alternar Tema">
+                    <svg x-show="!darkMode" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    <svg x-show="darkMode" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full space-y-12">
+
+        <!-- Navigation Tabs COM CORES SEMPRE VISÍVEIS -->
+        <div class="flex flex-wrap gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
+            <button @click="currentTab = 'overview'" 
+                    :class="currentTab === 'overview' 
+                        ? 'bg-sescRed text-white shadow-lg ring-4 ring-red-500/30 scale-105' 
+                        : 'bg-red-600/85 hover:bg-sescRed text-white border border-red-500/40 opacity-90 hover:opacity-100'" 
+                    class="px-6 py-3 rounded-2xl text-base sm:text-lg font-extrabold transition-all duration-200 flex items-center gap-2">
+                <span>Visão Geral</span>
+            </button>
+            
+            <button @click="currentTab = 'schedule'" 
+                    :class="currentTab === 'schedule' 
+                        ? 'bg-blue-600 text-white shadow-lg ring-4 ring-blue-500/30 scale-105' 
+                        : 'bg-blue-600/85 hover:bg-blue-600 text-white border border-blue-500/40 opacity-90 hover:opacity-100'" 
+                    class="px-6 py-3 rounded-2xl text-base sm:text-lg font-extrabold transition-all duration-200 flex items-center gap-2">
+                <span>Cronograma de aulas</span>
+            </button>
+            
+            <button @click="currentTab = 'participants'" 
+                    :class="currentTab === 'participants' 
+                        ? 'bg-emerald-600 text-white shadow-lg ring-4 ring-emerald-500/30 scale-105' 
+                        : 'bg-emerald-600/85 hover:bg-emerald-600 text-white border border-emerald-500/40 opacity-90 hover:opacity-100'" 
+                    class="px-6 py-3 rounded-2xl text-base sm:text-lg font-extrabold transition-all duration-200 flex items-center gap-2">
+                <span>Participantes</span>
+            </button>
+            
+            <button @click="currentTab = 'projects'" 
+                    :class="currentTab === 'projects' 
+                        ? 'bg-purple-600 text-white shadow-lg ring-4 ring-purple-500/30 scale-105' 
+                        : 'bg-purple-600/85 hover:bg-purple-600 text-white border border-purple-500/40 opacity-90 hover:opacity-100'" 
+                    class="px-6 py-3 rounded-2xl text-base sm:text-lg font-extrabold transition-all duration-200 flex items-center gap-2">
+                <span>Grupos e Projetos de conclusão</span>
+            </button>
+            
+            <button @click="currentTab = 'gdfe'" 
+                    :class="currentTab === 'gdfe' 
+                        ? 'bg-amber-500 text-slate-950 shadow-lg ring-4 ring-amber-400/40 scale-105' 
+                        : 'bg-amber-500/90 hover:bg-amber-500 text-slate-950 border border-amber-400/50 opacity-90 hover:opacity-100'" 
+                    class="px-6 py-3 rounded-2xl text-base sm:text-lg font-extrabold transition-all duration-200 flex items-center gap-2">
+                <span>Aulas GDFE</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: VISÃO GERAL -->
+        <div x-show="currentTab === 'overview'" class="space-y-12">
+            <!-- KPIs Soltos -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-2">
+                <div class="space-y-1">
+                    <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Carga Horária Total</p>
+                    <p class="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white">245h</p>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Presencial e Síncrona</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total de Aulas</p>
+                    <p class="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white">73</p>
+                    <p class="text-xs sm:text-sm text-blue-600 dark:text-blue-400 font-medium">57 Online | 16 Presenciais</p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Alunos Inscritos</p>
+                    <p class="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white">56</p>
+                    <p class="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 font-medium">Múltiplos Setores</p>
+                </div>
+            </div>
+
+            <!-- 4 Núcleos em Formas Circulares Grandes -->
+            <div class="space-y-6 pt-6 border-t border-slate-200 dark:border-slate-800">
+                <h3 class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Núcleos da Matriz Curricular</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Núcleo 1 -->
+                    <div class="p-8 rounded-3xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 flex flex-col items-center text-center space-y-4 shadow-sm">
+                        <div class="w-20 h-20 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-2xl shadow-md">1</div>
+                        <h4 class="text-base font-bold text-slate-900 dark:text-white">Esporte, Lazer e Sociedade/Cultura</h4>
+                        <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">Fenômeno sociocultural a partir de bases históricas, antropológicas e sociológicas.</p>
+                        <span class="text-xs sm:text-sm font-extrabold text-red-700 dark:text-red-400 pt-2 block">33,5 horas</span>
+                    </div>
+                    <!-- Núcleo 2 -->
+                    <div class="p-8 rounded-3xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 flex flex-col items-center text-center space-y-4 shadow-sm">
+                        <div class="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-2xl shadow-md">2</div>
+                        <h4 class="text-base font-bold text-slate-900 dark:text-white">Esporte e Diversidade Cultural</h4>
+                        <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">Diversidade cultural, gênero, etnia, PCDs, idosos e grupos invisibilizados.</p>
+                        <span class="text-xs sm:text-sm font-extrabold text-blue-700 dark:text-blue-400 pt-2 block">51,5 horas</span>
+                    </div>
+                    <!-- Núcleo 3 -->
+                    <div class="p-8 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 flex flex-col items-center text-center space-y-4 shadow-sm">
+                        <div class="w-20 h-20 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-2xl shadow-md">3</div>
+                        <h4 class="text-base font-bold text-slate-900 dark:text-white">Gestão do Esporte: Origem, Conceitos e Ferramentas</h4>
+                        <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">Ferramentas de gestão, planejamento, finanças, jurídico e comunicação.</p>
+                        <span class="text-xs sm:text-sm font-extrabold text-amber-700 dark:text-amber-400 pt-2 block">99,5 horas</span>
+                    </div>
+                    <!-- Núcleo 4 -->
+                    <div class="p-8 rounded-3xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 flex flex-col items-center text-center space-y-4 shadow-sm">
+                        <div class="w-20 h-20 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-2xl shadow-md">4</div>
+                        <h4 class="text-base font-bold text-slate-900 dark:text-white">Acompanhamento e Avaliação</h4>
+                        <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">Elaboração de um projeto de Gestão do Esporte e acompanhamento prático.</p>
+                        <span class="text-xs sm:text-sm font-extrabold text-emerald-700 dark:text-emerald-400 pt-2 block">60,5 horas</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Destaques: Formato, Setores de Atuação e PERFIL DOS ALUNOS INSCRITOS -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-6 border-t border-slate-200 dark:border-slate-800">
+                
+                <!-- Aulas por Formato -->
+                <div class="space-y-4">
+                    <h3 class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Aulas por Formato</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-5 rounded-3xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60 shadow-sm flex flex-col items-center text-center justify-center">
+                            <span class="text-xs text-blue-900 dark:text-blue-300 font-bold uppercase tracking-wider mb-1">Online</span>
+                            <div class="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-extrabold shadow-md my-1">
+                                57
+                            </div>
+                            <span class="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1">Aulas síncronas</span>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-900/60 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <span class="text-xs text-red-900 dark:text-red-300 font-bold uppercase tracking-wider block">Presencial</span>
+                                <p class="text-3xl font-extrabold text-red-700 dark:text-red-400 my-1">16</p>
+                            </div>
+                            <span class="text-xs text-slate-700 dark:text-slate-300 font-medium pt-2 border-t border-red-200 dark:border-red-900/40 block">Encontros / Visitas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Setores de Atuação dos Alunos -->
+                <div class="space-y-4">
+                    <h3 class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Setores de Atuação</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-900/60 text-center shadow-sm">
+                            <p class="text-xs font-bold text-purple-900 dark:text-purple-300 uppercase">Privado</p>
+                            <p class="text-2xl font-extrabold text-purple-700 dark:text-purple-300 my-1">30*</p>
+                            <span class="text-[10px] text-slate-600 dark:text-slate-400 font-medium">Alunos (*14 Sesc)</span>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-900/60 text-center shadow-sm">
+                            <p class="text-xs font-bold text-teal-900 dark:text-teal-300 uppercase">3º Setor</p>
+                            <p class="text-2xl font-extrabold text-teal-700 dark:text-teal-300 my-1">14</p>
+                            <span class="text-[10px] text-slate-600 dark:text-slate-400 font-medium">Alunos</span>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-900/60 text-center shadow-sm">
+                            <p class="text-xs font-bold text-sky-900 dark:text-sky-300 uppercase">Público</p>
+                            <p class="text-2xl font-extrabold text-sky-700 dark:text-sky-300 my-1">10</p>
+                            <span class="text-[10px] text-slate-600 dark:text-slate-400 font-medium">Alunos</span>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-900/60 text-center shadow-sm">
+                            <p class="text-xs font-bold text-orange-900 dark:text-orange-300 uppercase">Liderança</p>
+                            <p class="text-2xl font-extrabold text-orange-700 dark:text-orange-300 my-1">2</p>
+                            <span class="text-[10px] text-slate-600 dark:text-slate-400 font-medium">Alunos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOCO: PERFIL DOS ALUNOS INSCRITOS -->
+                <div class="space-y-4">
+                    <h3 class="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Perfil dos Inscritos</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-900/60 text-center shadow-sm flex flex-col justify-center">
+                            <p class="text-xl font-extrabold text-indigo-700 dark:text-indigo-300 my-1">30H | 26M</p>
+                            <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">Homens e Mulheres</span>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 text-center shadow-sm flex flex-col justify-center items-center">
+                            <span class="px-4 py-1 rounded-xl bg-rose-600 text-white text-2xl font-black shadow-md my-1 inline-block">3</span>
+                            <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">Homens com Deficiência</span>
+                        </div>
+                        <div class="col-span-2 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-900/60 text-center shadow-sm flex flex-col items-center justify-center space-y-1">
+                            <span class="px-5 py-1 rounded-xl bg-amber-500 text-slate-950 text-2xl font-black shadow-md inline-block">21</span>
+                            <span class="text-xs text-slate-700 dark:text-slate-300 font-bold">Pessoas Pretas e Pardas</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TAB 2: CRONOGRAMA DE AULAS -->
+        <div x-show="currentTab === 'schedule'" class="space-y-10" style="display: none;">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Linha do Tempo do Cronograma (73 Aulas)</h3>
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                    <select x-model="scheduleFormatFilter" class="bg-transparent border-b border-slate-400 dark:border-slate-600 py-1.5 text-base text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sescRed">
+                        <option value="" class="dark:bg-slate-900">Todos os Formatos</option>
+                        <option value="Online" class="dark:bg-slate-900">Online</option>
+                        <option value="Presencial" class="dark:bg-slate-900">Presencial</option>
+                    </select>
+                    <input type="text" x-model="searchSchedule" placeholder="Buscar aula ou convidado..." class="bg-transparent border-b border-slate-400 dark:border-slate-600 py-1.5 text-base text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sescRed w-full sm:w-64">
+                </div>
+            </div>
+
+            <div class="relative border-l-4 border-slate-400 dark:border-slate-600 ml-6 sm:ml-10 space-y-8 py-4">
+                <template x-for="item in filteredSchedule" :key="item.aula">
+                    <div class="relative pl-6 sm:pl-8 group">
+                        <div class="absolute -left-[11px] top-2 w-5 h-5 rounded-full border-4 border-sescRed bg-white dark:bg-slate-900 group-hover:bg-sescRed transition-colors shadow-sm"></div>
+                        
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-800/90 p-6 rounded-2xl border-2 border-slate-300 dark:border-slate-600 shadow-md hover:border-turquoise transition-all">
+                            <div class="space-y-2">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-base font-extrabold text-turquoise uppercase tracking-wider" x-text="item.aula"></span>
+                                    <span class="text-sm sm:text-base font-bold px-2.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200" x-text="item.data"></span>
+                                    <span class="text-xs px-3 py-1 rounded-full font-bold" :class="item.formato === 'Presencial' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300'" x-text="item.formato"></span>
+                                </div>
+                                <h4 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white" x-text="item.componente"></h4>
+                            </div>
+                            <div class="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium sm:text-right pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700">
+                                Convidado(a): <span class="text-slate-900 dark:text-white font-extrabold block sm:inline" x-text="item.convidado"></span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- TAB 3: PARTICIPANTES -->
+        <div x-show="currentTab === 'participants'" class="space-y-6" style="display: none;">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Lista de Alunos Participantes (56)</h3>
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                    <select x-model="participantSectorFilter" class="bg-transparent border-b border-slate-400 dark:border-slate-600 py-1.5 text-base text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sescRed">
+                        <option value="" class="dark:bg-slate-900">Todos os Setores</option>
+                        <option value="Privado" class="dark:bg-slate-900">Privado</option>
+                        <option value="Terceiro Setor" class="dark:bg-slate-900">Terceiro Setor</option>
+                        <option value="Público" class="dark:bg-slate-900">Público</option>
+                        <option value="Sesc" class="dark:bg-slate-900">Sesc</option>
+                        <option value="Liderança Comunitária" class="dark:bg-slate-900">Liderança Comunitária</option>
+                    </select>
+                    <input type="text" x-model="searchParticipant" placeholder="Buscar por nome ou instituição..." class="bg-transparent border-b border-slate-400 dark:border-slate-600 py-1.5 text-base text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sescRed w-full sm:w-64">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-300 dark:border-slate-700 text-sm font-bold text-slate-600 dark:text-slate-300 uppercase">
+                            <th class="py-3.5 px-4">ID</th>
+                            <th class="py-3.5 px-4">Nome Completo</th>
+                            <th class="py-3.5 px-4">Instituição / Unidade</th>
+                            <th class="py-3.5 px-4">Setor</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-base">
+                        <template x-for="p in filteredParticipants" :key="p.id">
+                            <tr class="hover:bg-slate-100/50 dark:hover:bg-slate-800/40 transition-colors">
+                                <td class="py-4 px-4 text-slate-400 text-xs font-semibold" x-text="p.id"></td>
+                                <td class="py-4 px-4 font-bold text-slate-900 dark:text-white" x-text="p.nome"></td>
+                                <td class="py-4 px-4 text-slate-700 dark:text-slate-300 font-medium" x-text="p.instituicao"></td>
+                                <td class="py-4 px-4">
+                                    <span class="inline-block px-3 py-1 rounded-lg text-xs sm:text-sm font-extrabold tracking-wide"
+                                          :class="{
+                                              'bg-purple-100 text-purple-900 dark:bg-purple-900/60 dark:text-purple-200 border border-purple-300 dark:border-purple-700': p.setor === 'Privado',
+                                              'bg-teal-100 text-teal-900 dark:bg-teal-900/60 dark:text-teal-200 border border-teal-300 dark:border-teal-700': p.setor === 'Terceiro Setor',
+                                              'bg-sky-100 text-sky-900 dark:bg-sky-900/60 dark:text-sky-200 border border-sky-300 dark:border-sky-700': p.setor === 'Público',
+                                              'bg-amber-100 text-amber-900 dark:bg-amber-900/60 dark:text-amber-200 border border-amber-300 dark:border-amber-700': p.setor === 'Sesc',
+                                              'bg-orange-100 text-orange-900 dark:bg-orange-900/60 dark:text-orange-200 border border-orange-300 dark:border-orange-700': p.setor === 'Liderança Comunitária'
+                                          }" 
+                                          x-text="p.setor">
+                                    </span>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 4: GRUPOS E PROJETOS DE CONCLUSÃO -->
+        <div x-show="currentTab === 'projects'" class="space-y-8" style="display: none;">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Grupos e Projetos de Conclusão (9 Grupos)</h3>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Acompanhamento dos temas, questões-problema, produtos finais e orientações.</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <input type="text" x-model="searchProject" placeholder="Buscar projeto, tema ou integrante..." class="bg-transparent border-b border-slate-400 dark:border-slate-600 py-1.5 text-base text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sescRed w-full sm:w-72">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="g in filteredProjects" :key="g.grupo">
+                    <div class="rounded-3xl p-6 sm:p-7 shadow-lg transition-transform hover:-translate-y-1 flex flex-col justify-between space-y-6 text-white"
+                         :class="{
+                             'bg-gradient-to-br from-indigo-700 to-blue-800': g.grupo % 9 === 1,
+                             'bg-gradient-to-br from-emerald-700 to-teal-800': g.grupo % 9 === 2,
+                             'bg-gradient-to-br from-amber-700 to-orange-800': g.grupo % 9 === 3,
+                             'bg-gradient-to-br from-rose-700 to-pink-800': g.grupo % 9 === 4,
+                             'bg-gradient-to-br from-violet-700 to-purple-800': g.grupo % 9 === 5,
+                             'bg-gradient-to-br from-cyan-700 to-blue-900': g.grupo % 9 === 6,
+                             'bg-gradient-to-br from-red-700 to-rose-900': g.grupo % 9 === 7,
+                             'bg-gradient-to-br from-teal-700 to-emerald-900': g.grupo % 9 === 8,
+                             'bg-gradient-to-br from-blue-800 to-indigo-900': g.grupo % 9 === 0
+                         }">
+                        
+                        <div class="flex items-center justify-between border-b border-white/20 pb-4">
+                            <span class="px-3.5 py-1 rounded-full bg-white/20 text-white font-extrabold text-xs uppercase tracking-wider backdrop-blur-sm">
+                                Grupo <span x-text="g.grupo"></span>
+                            </span>
+                            <span class="text-xs font-semibold px-3 py-1 rounded-lg bg-white/20 text-white border border-white/30 backdrop-blur-sm" x-text="g.produto"></span>
+                        </div>
+
+                        <div class="space-y-4 flex-grow">
+                            <div class="space-y-1.5">
+                                <span class="text-[11px] uppercase tracking-wider font-bold text-white/80">Título do Projeto</span>
+                                <h4 class="text-base sm:text-lg font-extrabold text-white leading-snug" x-text="g.titulo"></h4>
+                            </div>
+
+                            <div class="space-y-1.5 bg-black/20 p-4 rounded-2xl border border-white/15 backdrop-blur-sm">
+                                <span class="text-[11px] uppercase tracking-wider font-bold text-amber-300 block">Questão-Problema</span>
+                                <p class="text-xs sm:text-sm font-medium text-white/95 italic leading-relaxed" x-text="g.problema"></p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 pt-4 border-t border-white/20 text-xs">
+                            <div>
+                                <span class="font-bold text-white/70 uppercase text-[10px] block mb-0.5">Integrantes:</span>
+                                <p class="text-white/90 font-medium leading-relaxed" x-text="g.integrantes"></p>
+                            </div>
+                            <div class="flex flex-wrap justify-between items-center gap-2 pt-1 text-white/90">
+                                <div><strong class="text-white font-semibold">Orientador(a):</strong> <span x-text="g.orientador"></span></div>
+                                <div><strong class="text-white font-semibold">Tutor(a):</strong> <span x-text="g.tutor"></span></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- TAB 5: AULAS GDFE (CABEÇALHO SLIM LIMPO) -->
+        <div x-show="currentTab === 'gdfe'" class="space-y-10" style="display: none;">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+                <div class="flex items-center gap-3">
+                    <span class="bg-amber-500 text-slate-950 font-black text-xl px-5 py-2 rounded-2xl shadow-lg tracking-wider">
+                        GDFE
+                    </span>
+                </div>
+                <div class="flex items-center gap-2 text-xs font-bold px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-300">
+                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>3 Sessões Estratégicas</span>
+                </div>
+            </div>
+
+            <!-- LAYOUT PLANNER / CALENDÁRIO COM ESPIRAL / BINDER MODERNO -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- DIA 1: 08 DE MARÇO / 2027 (ONLINE) -->
+                <div class="bg-gradient-to-br from-blue-600 to-indigo-900 text-white rounded-[2rem] p-7 shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between border-2 border-blue-400/40 relative overflow-hidden">
+                    <!-- Argolas Ilustrativas de Planner / Binder no topo -->
+                    <div class="flex justify-around -mt-10 mb-6">
+                        <div class="w-3 h-7 bg-slate-300 dark:bg-slate-600 rounded-full border border-slate-400 shadow-inner"></div>
+                        <div class="w-3 h-7 bg-slate-300 dark:bg-slate-600 rounded-full border border-slate-400 shadow-inner"></div>
+                        <div class="w-3 h-7 bg-slate-300 dark:bg-slate-600 rounded-full border border-slate-400 shadow-inner"></div>
+                        <div class="w-3 h-7 bg-slate-300 dark:bg-slate-600 rounded-full border border-slate-400 shadow-inner"></div>
+                    </div>
+
+                    <!-- Cabeçalho de Folha de Calendário -->
+                    <div class="flex items-center justify-between bg-black/30 p-4 rounded-2xl border border-white/20 backdrop-blur-md">
+                        <div class="text-center bg-white text-blue-900 rounded-xl px-3.5 py-1.5 shadow-md">
+                            <span class="block text-[10px] uppercase font-black tracking-widest">SEG</span>
+                            <span class="block text-2xl font-black leading-none">08</span>
+                            <span class="block text-[9px] uppercase font-bold text-blue-700">MAR / 2027</span>
+                        </div>
+                        <div class="text-right space-y-1">
+                            <span class="inline-block px-3 py-1 rounded-full bg-blue-400/30 text-white text-xs font-black uppercase tracking-wider border border-white/20">
+                                ONLINE
+                            </span>
+                            <p class="text-xs font-extrabold text-blue-200 block">19h às 21h30</p>
+                        </div>
+                    </div>
+
+                    <!-- Corpo do Card / Componente -->
+                    <div class="my-6 space-y-2">
+                        <span class="text-[11px] font-black uppercase tracking-wider text-blue-200">Componente Curricular</span>
+                        <h4 class="text-lg font-black text-white leading-snug">
+                            Gestão de Campanhas e Programas | Sesc SP
+                        </h4>
+                    </div>
+
+                    <!-- Tarefas & Diretrizes de Escopo -->
+                    <div class="bg-black/30 p-5 rounded-2xl border border-white/15 space-y-3 backdrop-blur-sm">
+                        <div class="space-y-1.5">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-blue-300">Diretriz de Escopo GDFE</span>
+                            <div class="flex items-center gap-2 text-xs font-bold text-white">
+                                <svg class="w-4 h-4 text-blue-300 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                <span>GDFE define conteúdo da aula</span>
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t border-white/15 space-y-1">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-blue-300">Referência 2026</span>
+                            <p class="text-xs font-medium text-white/90">Fala Gerencial + Fala Programas Permanentes</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DIA 2: 13 DE MARÇO / 2027 (PRESENCIAL) -->
+                <div class="bg-gradient-to-br from-amber-500 via-orange-600 to-red-800 text-white rounded-[2rem] p-7 shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between border-2 border-amber-300/40 relative overflow-hidden">
+                    <!-- Argolas Ilustrativas de Planner / Binder no topo -->
+                    <div class="flex justify-around -mt-10 mb-6">
+                        <div class="w-3 h-7 bg-slate-300 dark:bg-slate-600 rounded-full border border-slate-400 shadow-inner"></div>
+                        <div class="w-3 h-7 bg-slate-300 dark:bg-slate-600 rounded-full border border-slate-400 shadow-inner"></div>
+                        <div class="w-3 h-7 bg-slate-300 dark:bg-slate-600 rounded-full border border-slate-400 shadow-inner"></div>
+                        <div class="w-3 h-7 bg-slate-300 dark:bg-slate-600 rounded-full border border-slate-400 shadow-inner"></div>
+                    </div>
+
+                    <!-- Cabeçalho de Folha de Calendário -->
+                    <div class="flex items-center justify-between bg-black/30 p-4 rounded-2xl border border-white/20 backdrop-blur-md">
+                        <div class="text-center bg-white text-orange-900 rounded-xl px-3.5 py-1.5 shadow-md">
+                            <span class="block text-[10px] uppercase font-black tracking-widest">SÁB</span>
+                            <span class="block text-2xl font-black leading-none">13</span>
+                            <span class="block text-[9px] uppercase font-bold text-orange-700">MAR / 2027</span>
+                        </div>
+                        <div class="text-right space-y-1">
+                            <span class="inline-block px-3 py-1 rounded-full bg-amber-400/30 text-white text-xs font-black uppercase tracking-wider border border-white/20">
+                                PRESENCIAL
+                            </span>
+                            <p class="text-xs font-extrabold text-amber-200 block">10h30 às 17h30</p>
+                        </div>
+                    </div>
+
+                    <!-- Corpo do Card / Componente & Local -->
+                    <div class="my-6 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-amber-200">Componente Curricular</span>
+                            <span class="text-[10px] font-bold px-2.5 py-0.5 rounded bg-black/25 text-white">Local: Pq. D. Pedro, Interlagos ou Bom Retiro</span>
+                        </div>
+                        <h4 class="text-lg font-black text-white leading-snug">
+                            Gestão de Campanhas e Programas | Sesc SP
+                        </h4>
+                    </div>
+
+                    <!-- Tarefas & Diretrizes de Escopo -->
+                    <div class="bg-black/30 p-5 rounded-2xl border border-white/15 space-y-3 backdrop-blur-sm">
+                        <div class="space-y-1.5">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-amber-200">Diretrizes de Escopo GDFE</span>
+                            <div class="flex items-center gap-2 text-xs font-bold text-white">
+                                <svg class="w-4 h-4 text-amber-300 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                <span>GDFE define conteúdo da aula</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs font-bold text-white">
+                                <svg class="w-4 h-4 text-amber-300 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                <span>GDFE define atividade prática</span>
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t border-white/15 space-y-1">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-amber-200">Referência 2026</span>
+                            <p class="text-xs font-medium text-white/90">Vivência de Movimento Consciente + Dinâmica do Núcleo de Campanhas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DIA 3: 20 DE MARÇO / 2027 (PRESENCIAL) -->
+                <div class="bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-900 text-white rounded-[2rem] p-7 shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between border-2 border-emerald-400/40 relative overflow-hidden">
+                    <!-- Argolas Ilustrativas de Planner / Binder no topo -->
+                    <div class="flex justify-around -mt-10 mb-6">
+                        <div class="w-3 h-7 bg-slate-300 dark:bg-slate-600 rounded-full border border-slate-400 shadow-inner"></div>
+                        <div class="w-3 h-7 bg-slate-300 dark:bg-slate-600 rounded-full border border-slate-400 shadow-inner"></div>
+                        <div class="w-3 h-7 bg-slate-300 dark:bg-slate-600 rounded-full border border-slate-400 shadow-inner"></div>
+                        <div class="w-3 h-7 bg-slate-300 dark:bg-slate-600 rounded-full border border-slate-400 shadow-inner"></div>
+                    </div>
+
+                    <!-- Cabeçalho de Folha de Calendário -->
+                    <div class="flex items-center justify-between bg-black/30 p-4 rounded-2xl border border-white/20 backdrop-blur-md">
+                        <div class="text-center bg-white text-teal-900 rounded-xl px-3.5 py-1.5 shadow-md">
+                            <span class="block text-[10px] uppercase font-black tracking-widest">SÁB</span>
+                            <span class="block text-2xl font-black leading-none">20</span>
+                            <span class="block text-[9px] uppercase font-bold text-teal-700">MAR / 2027</span>
+                        </div>
+                        <div class="text-right space-y-1">
+                            <span class="inline-block px-3 py-1 rounded-full bg-emerald-400/30 text-white text-xs font-black uppercase tracking-wider border border-white/20">
+                                PRESENCIAL
+                            </span>
+                            <p class="text-xs font-extrabold text-emerald-200 block">10h30 às 17h30</p>
+                        </div>
+                    </div>
+
+                    <!-- Corpo do Card / Componente & Local -->
+                    <div class="my-6 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-emerald-200">Componente Curricular</span>
+                            <span class="text-[10px] font-bold px-2.5 py-0.5 rounded bg-black/25 text-white">Local: CPF</span>
+                        </div>
+                        <h4 class="text-lg font-black text-white leading-snug">
+                            Relações Internacionais | ISCA
+                        </h4>
+                    </div>
+
+                    <!-- Tarefas & Diretrizes de Escopo -->
+                    <div class="bg-black/30 p-5 rounded-2xl border border-white/15 space-y-3 backdrop-blur-sm">
+                        <div class="space-y-1.5">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-emerald-200">Diretriz de Escopo GDFE</span>
+                            <div class="flex items-center gap-2 text-xs font-bold text-white">
+                                <svg class="w-4 h-4 text-emerald-300 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                <span>GDFE articula conteúdo com a ISCA</span>
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t border-white/15 space-y-1">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-emerald-200">Referência 2026</span>
+                            <p class="text-xs font-medium text-white/90">Maria Luiza, e Mogens(online)</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-slate-800 py-8 mt-16 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+        <p>Centro de Pesquisa e Formação • Sesc São Paulo | 5ª Edição do Curso Sesc de Gestão do Esporte (2026/2027)</p>
+    </footer>
+
+    <!-- JavaScript Application Data -->
+    <script>
+        function dashboardData() {
+            return {
+                currentTab: 'overview',
+                darkMode: true, // Inicia nativamente no modo escuro
+                searchSchedule: '',
+                scheduleFormatFilter: '',
+                searchParticipant: '',
+                participantSectorFilter: '',
+                searchProject: '',
+
+                toggleTheme() {
+                    this.darkMode = !this.darkMode;
+                },
+
+                schedule: [
+                    { aula: 'Aula 1', data: '14/8/2026', formato: 'Presencial', componente: 'Aula inaugural', convidado: 'João Guadanucci' },
+                    { aula: 'Aula 2', data: '15/8/2026', formato: 'Presencial', componente: 'Relatos de experiência', convidado: 'Aline Silva' },
+                    { aula: 'Aula 3', data: '17/8/2026', formato: 'Online', componente: 'História do Esporte: da antiguidade à contemporaneidade', convidado: 'Victor Melo' },
+                    { aula: 'Aula 4', data: '19/8/2026', formato: 'Online', componente: 'Educação Física e Esporte no Brasil', convidado: 'Ivy Guedes' },
+                    { aula: 'Aula 5', data: '24/8/2026', formato: 'Online', componente: 'Competências para a Gestão do Esporte', convidado: 'Giselle Tavares' },
+                    { aula: 'Aula 6', data: '26/8/2026', formato: 'Online', componente: 'História e contexto da Gestão do Esporte', convidado: 'Ary Rocco' },
+                    { aula: 'Aula 7', data: '29/8/2026', formato: 'Presencial', componente: 'Diagnóstico Rápido Participativo | DRP', convidado: 'Tutoras (CPF)' },
+                    { aula: 'Aula 8', data: '31/8/2026', formato: 'Online', componente: 'Sociologia do Esporte', convidado: 'Valter Bratch' },
+                    { aula: 'Aula 9', data: '02/09/2026', formato: 'Online', componente: 'Sociologia do Esporte', convidado: 'Valter Bratch' },
+                    { aula: 'Aula 10', data: '09/09/2026', formato: 'Online', componente: 'Mapeamentos e Etnografia', convidado: 'João Guadanucci' },
+                    { aula: 'Aula 11', data: '12/09/2026', formato: 'Presencial', componente: 'Mapeamentos e Etnografia', convidado: 'Rafael Sanzio' },
+                    { aula: 'Aula 12', data: '14/9/2026', formato: 'Online', componente: 'Esporte e Desenvolvimento humano', convidado: 'Simone Rechia' },
+                    { aula: 'Aula 13', data: '16/9/2026', formato: 'Online', componente: 'Filosofia do Esporte', convidado: 'Aza Njeri' },
+                    { aula: 'Aula 14', data: '21/9/2026', formato: 'Online', componente: 'Filosofia do Esporte', convidado: 'Odilon Robbles' },
+                    { aula: 'Aula 15', data: '23/9/2026', formato: 'Online', componente: 'Orientação | Projetos de Gestão do Esporte', convidado: 'Tutoras' },
+                    { aula: 'Aula 16', data: '26/9/2026', formato: 'Presencial', componente: 'Territórios e resistência', convidado: 'Direg l visita Arena BV' },
+                    { aula: 'Aula 17', data: '28/9/2026', formato: 'Online', componente: 'Orientação | Projetos de Gestão do Esporte', convidado: 'Tutoras' },
+                    { aula: 'Aula 18', data: '30/9/2026', formato: 'Online', componente: 'Esporte e Direitos humanos', convidado: 'Ester Rizzi' },
+                    { aula: 'Aula 19', data: '05/10/2026', formato: 'Online', componente: 'Diversidade e interseccionalidades', convidado: 'Marie Luce' },
+                    { aula: 'Aula 20', data: '07/10/2026', formato: 'Online', componente: 'Negritudes e Esporte', convidado: 'Josiane Clímaco' },
+                    { aula: 'Aula 21', data: '14/10/2026', formato: 'Online', componente: 'Competências socioemocionais para gestores', convidado: 'Francila' },
+                    { aula: 'Aula 22', data: '17/10/2026', formato: 'Presencial', componente: 'Liderança de equipes e pessoas', convidado: 'Michele Santos' },
+                    { aula: 'Aula 23', data: '19/10/2026', formato: 'Online', componente: 'Pessoas idosas e Esporte', convidado: 'Alessandra Nascimento/Beltrina Côrte' },
+                    { aula: 'Aula 24', data: '21/10/2026', formato: 'Online', componente: 'Mulheres e Esporte', convidado: 'Silvana Goellner' },
+                    { aula: 'Aula 25', data: '26/10/2026', formato: 'Online', componente: 'Masculinidades e Esporte', convidado: 'Leandro Teófilo' },
+                    { aula: 'Aula 26', data: '28/10/2026', formato: 'Online', componente: 'Metodologia da pesquisa', convidado: 'Philippe Guedon' },
+                    { aula: 'Aula 27', data: '04/11/2026', formato: 'Online', componente: 'Pessoas com deficiência e Esporte', convidado: 'Andresa Caravage' },
+                    { aula: 'Aula 28', data: '07/11/2026', formato: 'Presencial', componente: 'Pessoas com deficiência e Esporte', convidado: 'PEAMA' },
+                    { aula: 'Aula 29', data: '09/11/2026', formato: 'Online', componente: 'Pessoas gordas, padrões corporais e Esporte', convidado: 'Agnes Arruda' },
+                    { aula: 'Aula 30', data: '11/11/2026', formato: 'Online', componente: 'Pessoas em situação de refúgio e Esporte', convidado: 'Benazira' },
+                    { aula: 'Aula 31', data: '16/11/2026', formato: 'Online', componente: 'Pessoas LGBTQIA+ e Esporte', convidado: 'Fabrício / Cris Macfer' },
+                    { aula: 'Aula 32', data: '18/11/2026', formato: 'Online', componente: 'Comunidades tradicionais e Esporte', convidado: 'Lennon/Soraya' },
+                    { aula: 'Aula 33', data: '23/11/2026', formato: 'Online', componente: 'Pessoas em medidas socioeducativas e Esporte', convidado: 'Rosângela / Anderson' },
+                    { aula: 'Aula 34', data: '25/11/2026', formato: 'Online', componente: 'Orientação | Projetos de Gestão do Esporte', convidado: 'CONSULTORES' },
+                    { aula: 'Aula 35', data: '28/11/2026', formato: 'Presencial', componente: 'Jogos e Brincadeiras tradicionais', convidado: 'Lucilene (OCA)' },
+                    { aula: 'Aula 36', data: '30/11/2026', formato: 'Online', componente: 'Esporte e Sustentabilidade', convidado: 'Silvia Stuchi' },
+                    { aula: 'Aula 37', data: '02/12/2026', formato: 'Online', componente: 'Gestão do conhecimento e Esporte', convidado: 'Giselle Tavares' },
+                    { aula: 'Aula 38', data: '07/12/2026', formato: 'Online', componente: 'Planejamento no Esporte', convidado: 'Ivan Furegato' },
+                    { aula: 'Aula 39', data: '09/12/2026', formato: 'Online', componente: 'Planejamento no Esporte', convidado: 'Ivan Furegato' },
+                    { aula: 'Aula 40', data: '12/12/2026', formato: 'Presencial', componente: 'Gestão administrativa | Sesc SP', convidado: 'SA' },
+                    { aula: 'Aula 41', data: '14/12/2026', formato: 'Online', componente: 'Orientação | Projetos de Gestão do Esporte', convidado: 'Tutoras (CPF)' },
+                    { aula: 'Aula 42', data: '13/01/2027', formato: 'Online', componente: 'Cidades ativas e mobilidade urbana', convidado: 'Silvia Stuchi' },
+                    { aula: 'Aula 43', data: '16/01/2027', formato: 'Presencial', componente: 'Políticas públicas para o Esporte', convidado: 'Pedro Athaíde' },
+                    { aula: 'Aula 44', data: '18/01/2027', formato: 'Online', componente: 'Legislação Esportiva', convidado: 'Fernando Mezzadri' },
+                    { aula: 'Aula 45', data: '20/01/2027', formato: 'Online', componente: 'Advocacy no Esporte', convidado: 'Diogo Silva' },
+                    { aula: 'Aula 46', data: '27/01/2027', formato: 'Online', componente: 'Orientação | Projetos de Gestão do Esporte', convidado: 'Tutoras (CPF)' },
+                    { aula: 'Aula 47', data: '30/01/2027', formato: 'Presencial', componente: 'Políticas afirmativas', convidado: 'Rose Maria / Equipe' },
+                    { aula: 'Aula 48', data: '01/02/2027', formato: 'Online', componente: 'Advocacy no Esporte', convidado: 'Daniela' },
+                    { aula: 'Aula 49', data: '03/02/2027', formato: 'Online', componente: 'Empreendedorismo social no Esporte', convidado: 'Cibelle e Neide (Vida Corrida)' },
+                    { aula: 'Aula 50', data: '15/02/2027', formato: 'Online', componente: 'Escrita de projetos esportivos', convidado: 'Bia Amorim' },
+                    { aula: 'Aula 51', data: '17/02/2027', formato: 'Online', componente: 'Escrita de projetos esportivos', convidado: 'Bia Amorim' },
+                    { aula: 'Aula 52', data: '20/02/2027', formato: 'Presencial', componente: 'Gestão de programas Esportivos', convidado: 'EPROCAD' },
+                    { aula: 'Aula 53', data: '22/02/2027', formato: 'Online', componente: 'Orientação | Projetos de Gestão do Esporte', convidado: 'CONSULTORES' },
+                    { aula: 'Aula 54', data: '24/02/2027', formato: 'Online', componente: 'Gestão financeira no terceiro setor', convidado: 'Antônio Tozzi' },
+                    { aula: 'Aula 55', data: '27/02/2027', formato: 'Presencial', componente: 'Gestão de eventos Esportivos', convidado: 'Líbia' },
+                    { aula: 'Aula 56', data: '01/03/2027', formato: 'Online', componente: 'Gestão de instalações Esportivas', convidado: 'Cacilda Amaral' },
+                    { aula: 'Aula 57', data: '03/03/2027', formato: 'Online', componente: 'Gestão financeira no setor público', convidado: 'F. Starepravo' },
+                    { aula: 'Aula 58', data: '08/03/2027', formato: 'Online', componente: 'Gestão de campanhas e programas | Sesc SP', convidado: 'GDFE' },
+                    { aula: 'Aula 59', data: '10/03/2027', formato: 'Online', componente: 'Gestão jurídica | Sesc SP', convidado: 'AJ' },
+                    { aula: 'Aula 60', data: '13/03/2027', formato: 'Presencial', componente: 'Gestão de campanhas e programas | Sesc SP', convidado: 'GDFE' },
+                    { aula: 'Aula 61', data: '15/3/2027', formato: 'Online', componente: 'Orientação | Projetos de Gestão do Esporte', convidado: 'Tutoras (CPF)' },
+                    { aula: 'Aula 62', data: '17/3/2027', formato: 'Online', componente: 'Captação de recursos para projetos esportivos', convidado: 'Eduardo Carlassara' },
+                    { aula: 'Aula 63', data: '20/3/2027', formato: 'Presencial', componente: 'Relações internacionais | ISCA', convidado: 'Relações internacionais | ISCA' },
+                    { aula: 'Aula 64', data: '22/3/2027', formato: 'Online', componente: 'Prestação de contas para projetos esportivos', convidado: 'Sabrina Vitório' },
+                    { aula: 'Aula 65', data: '24/3/2027', formato: 'Online', componente: 'Gestão da comunicação no Esporte', convidado: 'Ary Rocco' },
+                    { aula: 'Aula 66', data: '29/3/2027', formato: 'Online', componente: 'Gestão da comunicação no Esporte', convidado: 'Taís Oliveira' },
+                    { aula: 'Aula 67', data: '31/3/2027', formato: 'Online', componente: 'Orientação | Projetos de Gestão do Esporte', convidado: 'Tutoras (CPF)' },
+                    { aula: 'Aula 68', data: '05/04/2027', formato: 'Online', componente: 'Esporte e Mídia', convidado: 'Rafaelle Serafim (Marcelo Carvalho)' },
+                    { aula: 'Aula 69', data: '07/04/2027', formato: 'Online', componente: 'Tecnologias e Esporte', convidado: 'Maria Teresa' },
+                    { aula: 'Aula 70', data: '12/04/2027', formato: 'Online', componente: 'Tecnologias e Esporte', convidado: 'Daiany França' },
+                    { aula: 'Aula 71', data: '14/04/2027', formato: 'Online', componente: 'Orientação | Projetos de Gestão do Esporte', convidado: 'Tutoras (CPF)' },
+                    { aula: 'Aula 72', data: '16/04/2027', formato: 'Presencial', componente: 'Apresentações: Projetos de Gestão do Esporte', convidado: 'CPF' },
+                    { aula: 'Aula 73', data: '17/04/2027', formato: 'Presencial', componente: 'Apresentações: Projetos de Gestão do Esporte', convidado: 'CPF' }
+                ],
+
+                participants: [
+                    { id: 1, nome: 'Adilson de Jesus dos Santos', instituicao: 'Prefeitura de Taboão da Serra', setor: 'Público' },
+                    { id: 2, nome: 'Alexandre Soares Miranda', instituicao: 'Diretor técnico e orientador técnico da Equipe Universitária de Capoeira da UniSantana', setor: 'Privado' },
+                    { id: 3, nome: 'Aline Santos Antunes', instituicao: 'Coletivo de Boxe Sem Terra', setor: 'Liderança Comunitária' },
+                    { id: 4, nome: 'Ana Luiza de Mesquita Pinto Souza', instituicao: 'Confederação Brasileira de Tiro com Arco​', setor: 'Privado' },
+                    { id: 5, nome: 'Anderson Lucas Rodrigues Almeida', instituicao: 'LoveCT', setor: 'Terceiro Setor' },
+                    { id: 6, nome: 'Bárbara Silveira Dionízio Dziabas', instituicao: 'Associação Paradesportiva de São Carlos', setor: 'Terceiro Setor' },
+                    { id: 7, nome: 'Beatriz de Souza Macedo', instituicao: 'Escola Móbile', setor: 'Privado' },
+                    { id: 8, nome: 'Bianca dos Santos Rubio', instituicao: 'Smartfit e TitansTrans', setor: 'Privado' },
+                    { id: 9, nome: 'Bruno Lelis de Souza Faria', instituicao: 'Instituto Lumiar de Belo Horizonte', setor: 'Terceiro Setor' },
+                    { id: 10, nome: 'Diogo Vinicius de Oliveira', instituicao: 'Projeto PONTE', setor: 'Terceiro Setor' },
+                    { id: 11, nome: 'Emerson Antonio Lazaro Prata', instituicao: 'Museu do Futebol', setor: 'Público' },
+                    { id: 12, nome: 'Everton Celeste Faustino', instituicao: 'Instituto Esporte Educação', setor: 'Terceiro Setor' },
+                    { id: 13, nome: 'Fátima Aparecida da Silva', instituicao: 'Presidente da Associação de Basquete​', setor: 'Terceiro Setor' },
+                    { id: 14, nome: 'Fernanda Cristina de Andrade', instituicao: 'FMUSP', setor: 'Público' },
+                    { id: 15, nome: 'Flavio Roberto dos Santos Correia', instituicao: 'INSEP Instituto Equidade Plural', setor: 'Terceiro Setor' },
+                    { id: 16, nome: 'Franciele Dionisio da Costa', instituicao: 'Boxe Autonômo', setor: 'Privado' },
+                    { id: 17, nome: 'Helena Barbosa Geraldes', instituicao: 'Agência COMBO e Portal Sereias', setor: 'Privado' },
+                    { id: 18, nome: 'Isabella Rizzoli Sarmento', instituicao: 'Track&Field', setor: 'Privado' },
+                    { id: 19, nome: 'Isabelle Eringis Amaral', instituicao: 'Assessoria esportiva, Belle Forma', setor: 'Privado' },
+                    { id: 20, nome: 'Jaqueline Lima Sapucaia', instituicao: 'Comitê Paralimpico Brasileiro', setor: 'Público' },
+                    { id: 21, nome: 'Julio Cezar Gregorio de Araujo', instituicao: 'Presidente Liga Paulista de Judô', setor: 'Terceiro Setor' },
+                    { id: 22, nome: 'Karen Bispo de Souza', instituicao: 'Auxiliar de enfermagem em UBS pela SPDM | Fundadora projeto de futebol', setor: 'Terceiro Setor' },
+                    { id: 23, nome: 'Leonardo Fonseca Gregorio', instituicao: 'Comitê Paralímpico Brasileiro', setor: 'Público' },
+                    { id: 24, nome: 'Leonardo Lopes Gomide', instituicao: 'Dinâmica Esportes e Recreação', setor: 'Privado' },
+                    { id: 25, nome: 'Luciana Tozo Vieira', instituicao: 'Associação das Minas', setor: 'Terceiro Setor' },
+                    { id: 26, nome: 'Mateus de Seixas Bizetti', instituicao: 'Instituto Superação', setor: 'Terceiro Setor' },
+                    { id: 27, nome: 'Nathalia Ferreira de Souza', instituicao: 'Instituto Baccarelli - Céu Freguesia do Ó', setor: 'Terceiro Setor' },
+                    { id: 28, nome: 'Pedro Sombra de Souza', instituicao: 'OLÉ (USP)', setor: 'Liderança Comunitária' },
+                    { id: 29, nome: 'Priscilla de Siqueira Germignani Martins', instituicao: 'Liga Solidária', setor: 'Terceiro Setor' },
+                    { id: 30, nome: 'Raphael Teixeira Martins', instituicao: 'Assistente Social da Equipe Especializada em Violência (EEV) no SUS  e SUAS', setor: 'Público' },
+                    { id: 31, nome: 'Rayane de Morais Paulino', instituicao: 'Bodytech Eldorado', setor: 'Privado' },
+                    { id: 32, nome: 'Reginaldo dos Reis Pereira', instituicao: 'Prefeitura de Guaranésia - MG', setor: 'Público' },
+                    { id: 33, nome: 'Rodrigo Salazar Stavale', instituicao: 'Academia Pico (Parkour, Circo e Calistenia)', setor: 'Privado' },
+                    { id: 34, nome: 'Rogel José de Jesus Oliveira', instituicao: 'Projeto Chega Junto e Clube Atlético Monte Líbano', setor: 'Terceiro Setor' },
+                    { id: 35, nome: 'Sarah Luiza Gomes da Silva Guatura', instituicao: 'Centro de Defesa dos Direitos da Criança e do Adolescente', setor: 'Terceiro Setor' },
+                    { id: 36, nome: 'Talita Maria da Silva', instituicao: 'Studio de Treinamento Mormaii', setor: 'Privado' },
+                    { id: 37, nome: 'Thaise Guimarães de Oliveira', instituicao: 'Secretaria de Esportes da Prefeitura Municipal de Barueri', setor: 'Público' },
+                    { id: 38, nome: 'Tomaz Branco da Costa Bueno', instituicao: 'Vida Adaptada', setor: 'Privado' },
+                    { id: 39, nome: 'Valéria Aparecida da Silva', instituicao: 'Ponto de Cultura Instituto Espaço Arterial', setor: 'Terceiro Setor' },
+                    { id: 40, nome: 'Vinicius Lopes da Silva', instituicao: 'Sesi - São José do Rio Preto', setor: 'Privado' },
+                    { id: 41, nome: 'Willian José Silva', instituicao: 'Coordenador de Esporte no CEU Parque do Carmo', setor: 'Privado' },
+                    { id: 42, nome: 'Willy Montmann', instituicao: 'Sec. Municipal de Esportes de São Paulo - Nix Diversidade​', setor: 'Público' },
+                    { id: 43, nome: 'Amanda Santos Sobral', instituicao: 'Sesc SP - 24 de Maio', setor: 'Sesc' },
+                    { id: 44, nome: 'Diogo de Barros Souza', instituicao: 'Sesc SP - Santos', setor: 'Sesc' },
+                    { id: 45, nome: 'Evelyn Ávila', instituicao: 'Sesc MG - Santa Quitéria', setor: 'Sesc' },
+                    { id: 46, nome: 'Fernanda Romano da Silva e Oliveira', instituicao: 'Sesc SP - Belenzinho', setor: 'Sesc' },
+                    { id: 47, nome: 'Fernando Gomes da Silva', instituicao: 'Sesc SP - Bom Retiro', setor: 'Sesc' },
+                    { id: 48, nome: 'Gelson Luiz Daldegan de Pádua', instituicao: 'Sesc ES - Sede', setor: 'Sesc' },
+                    { id: 49, nome: 'Lilian Pereira de Arantes', instituicao: 'Sesc SP - Sorocaba', setor: 'Sesc' },
+                    { id: 50, nome: 'Maria Clara Soares Pontoglio', instituicao: 'Sesc SP - Consolação', setor: 'Sesc' },
+                    { id: 51, nome: 'Rafael Gonçalves de Souza', instituicao: 'Sesc SP - São José dos Campos', setor: 'Sesc' },
+                    { id: 52, nome: 'Rene Vinicius Donnangelo Fender', instituicao: 'Sesc SP - Santo Amaro', setor: 'Sesc' },
+                    { id: 53, nome: 'Roberto Mariano Junior', instituicao: 'Sesc ES - Sede', setor: 'Sesc' },
+                    { id: 54, nome: 'Robson Carlos Schiavo Zanini', instituicao: 'Sesc ES - Vila Velha', setor: 'Sesc' },
+                    { id: 55, nome: 'Thiago Andrade Alves', instituicao: 'Sesc DF - Sede', setor: 'Sesc' },
+                    { id: 56, nome: 'Vinicius Monteiro Cardoso', instituicao: 'Sesc SP - Casa Verde', setor: 'Sesc' }
+                ],
+
+                projects: [
+                    {
+                        grupo: '1',
+                        integrantes: 'Aline Santos Antunes; Valéria Aparecida da Silva; Anderson Lucas Rodrigues Almeida; Bruno Lelis de Souza Faria; Leonardo Fonseca Gregorio; Willian José Silva',
+                        titulo: 'Etapas e desafios da construção de um projeto esportivo e social: da teoria até a aplicação na prática',
+                        problema: 'Como estruturar um projeto esportivo/cultural e quais são os requisitos jurídicos mínimos e as formalidades necessárias?',
+                        produto: 'Cartilha e atividade prática',
+                        orientador: 'Sabrina de Lima Vitório',
+                        tutor: 'Gaby'
+                    },
+                    {
+                        grupo: '2',
+                        integrantes: 'Diogo Vinicius de Oliveira; Everton Celeste Faustino; Flavio Roberto dos Santos Correia; Luciana Tozo Vieira; Nathalia Ferreira de Souza; Rogel José de Jesus Oliveira',
+                        titulo: 'Guia para Constituição e Sustentabilidade de Organizações da Sociedade Civil no Brasil',
+                        problema: 'Quais os principais desafios jurídico-institucionais das OSCs e como fortalecer sua gestão e impacto social?',
+                        produto: 'Cartilha',
+                        orientador: 'Aline Silva',
+                        tutor: 'Andresa'
+                    },
+                    {
+                        grupo: '3',
+                        integrantes: 'Sarah Gomes; Pedro Sombra de Souza; Rodrigo Salazar Stavale; Mateus Bizetti; Tomaz Bueno; Priscilla Germignani',
+                        titulo: 'Jornada das Iniciativas Esportivas: Por Onde Começo?',
+                        problema: 'Como ajudar pessoas com ideias ou iniciativas esportivas a transformá-las em projetos formalizados?',
+                        produto: 'Quiz, site e formulário gamificado',
+                        orientador: 'Eduardo Carlassara',
+                        tutor: 'Gaby'
+                    },
+                    {
+                        grupo: '4',
+                        integrantes: 'Adilson; Emerson; Franciele; Thaise; Willy',
+                        titulo: 'Mapeamento de Iniciativas de Projetos Esportivos',
+                        problema: 'Como ampliar a visibilidade dos projetos esportivos existentes nos territórios?',
+                        produto: 'Material gráfico e minidocumentário',
+                        orientador: 'Rafael Sanzio',
+                        tutor: 'Carol'
+                    },
+                    {
+                        grupo: '5',
+                        integrantes: 'Rafhael Martins; Karen Bispo; Reginaldo dos Reis Pereira; Fernanda Cristina de Andrade; Júlio',
+                        titulo: 'Academia da Saúde no SUS: quais os fatores favorecem e dificultam nos territórios',
+                        problema: 'Quais fatores favorecem e dificultam o desenvolvimento do Programa Academia da Saúde nos territórios?',
+                        produto: 'Artigo e vídeo',
+                        orientador: 'Simone Rechia',
+                        tutor: 'Fábio'
+                    },
+                    {
+                        grupo: '6',
+                        integrantes: 'Amanda Santos Sobral; Diogo de Barros Souza; Evelyn Ávila; Gelson Luiz Daldegan de Pádua; Rafael Gonçalves de Souza; Rene Vinicius Donnangelo Fender; Vinicius Monteiro Cardoso',
+                        titulo: 'Estratégias de Gestão para Desenvolvimento e Sustentabilidade de Comunidades Esportivas',
+                        problema: 'Como a gestão influencia participação, integração e sustentabilidade das comunidades esportivas?',
+                        produto: 'Vídeo',
+                        orientador: 'Aza Njeri',
+                        tutor: 'Carol'
+                    },
+                    {
+                        grupo: '7',
+                        integrantes: 'Fernanda Romano; Fernando Gomes da Silva; Lilian Pereira de Arantes; Maria Clara Pontoglio; Thiago Alves; Roberto Mariano; Robson Zanini',
+                        titulo: 'Do acesso ao impacto: desenvolvimento de um instrumento para mensuração dos impactos sociais das ações do Sesc',
+                        problema: 'Como mensurar os impactos sociais percebidos pelos participantes das ações esportivas do Sesc?',
+                        produto: 'Slides',
+                        orientador: 'João Guadanucci',
+                        tutor: 'Fábio'
+                    },
+                    {
+                        grupo: '8',
+                        integrantes: 'Helena Barbosa Geraldes; Jaqueline Lima Sapucaia; Alexandre Soares Miranda; Ana Luiza de Mesquita Pinto Souza; Bárbara Silveira Dionízio Dziabas; Beatriz de Souza Macedo; Fátima Aparecida da Silva',
+                        titulo: 'Distribuição de Recursos no Esporte Paralímpico',
+                        problema: 'Como se caracteriza a distribuição dos recursos públicos descentralizados pelo Comitê Paralímpico Brasileiro?',
+                        produto: 'Slides e infográficos',
+                        orientador: 'Fernando Mezzadri',
+                        tutor: 'Andresa'
+                    },
+                    {
+                        grupo: '9',
+                        integrantes: 'Isabella Rizzoli Sarmento; Isabelle Eringis Amaral; Leonardo Lopes Gomide; Rayane de Morais Paulino; Talita Maria da Silva; Vinicius Lopes da Silva; Bianca dos Santos Rubio',
+                        titulo: 'Transformação de Instalações Esportivas em Espaços de convivência e Lazer',
+                        problema: 'Como gestores podem transformar instalações esportivas subutilizadas em espaços de lazer e convivência?',
+                        produto: 'Cartilha metodológica',
+                        orientador: 'Cacilda Amaral',
+                        tutor: 'Dini'
+                    }
+                ],
+
+                get filteredSchedule() {
+                    return this.schedule.filter(s => {
+                        const matchesSearch = s.componente.toLowerCase().includes(this.searchSchedule.toLowerCase()) ||
+                                              s.convidado.toLowerCase().includes(this.searchSchedule.toLowerCase()) ||
+                                              s.aula.toLowerCase().includes(this.searchSchedule.toLowerCase());
+                        const matchesFormat = this.scheduleFormatFilter === '' || s.formato === this.scheduleFormatFilter;
+                        return matchesSearch && matchesFormat;
+                    });
+                },
+
+                get filteredParticipants() {
+                    return this.participants.filter(p => {
+                        const matchesSearch = p.nome.toLowerCase().includes(this.searchParticipant.toLowerCase()) ||
+                                              p.instituicao.toLowerCase().includes(this.searchParticipant.toLowerCase());
+                        const matchesSector = this.participantSectorFilter === '' || p.setor === this.participantSectorFilter;
+                        return matchesSearch && matchesSector;
+                    });
+                },
+
+                get filteredProjects() {
+                    return this.projects.filter(g => {
+                        const query = this.searchProject.toLowerCase();
+                        return g.titulo.toLowerCase().includes(query) ||
+                               g.problema.toLowerCase().includes(query) ||
+                               g.integrantes.toLowerCase().includes(query) ||
+                               g.produto.toLowerCase().includes(query) ||
+                               g.grupo.toLowerCase().includes(query);
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
